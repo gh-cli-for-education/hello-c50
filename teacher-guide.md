@@ -200,19 +200,26 @@ Advise casiano-rodriguez to sign in to https://github.com as casiano-rodriguez, 
 ```
 ➜  hello-c50 git:(main) ✗ gh teacher roster import --help
 Read <path-to-csv> and upsert every row into
-<org>/classroom50/<classroom>/students.csv. The local CSV
-header must be `username,first_name,last_name,email,section`
-(the canonical 5 columns). A trailing `github_id` column
-is accepted but its value is ignored — the CLI re-resolves
-github_id from `GET /users/{username}` at import time so
-the on-disk roster always carries the GitHub-authoritative
-ID. The `email` column may have empty values per row.
+<org>/classroom50/<classroom>/students.csv. 
+```
 
-The whole file is written in one Tree commit, not one PUT
+The local CSV header must be 
+
+   `username,first_name,last_name,email,section`
+
+(the canonical 5 columns). 
+
+- A trailing `github_id` column is accepted but its value is ignored 
+— the CLI re-resolves github_id from `GET /users/{username}` at import time 
+so the on-disk roster always carries the GitHub-authoritative ID. 
+- The `email` column may have empty values per row.
+
+The whole file is written in one Tree commit, not one `PUT`
 per row, so partial-import states can't appear on the repo.
 After the commit lands, any student who isn't already in
 the org (and doesn't have a pending invite) is invited.
 
+```
 Usage:
   gh-teacher roster import <org> <classroom> <path-to-csv> [flags]
 

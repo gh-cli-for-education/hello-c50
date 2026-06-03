@@ -31,7 +31,11 @@ If you skip this step and have no token at all, the CLI detects the missing toke
 
 ### Login
 
+I am using the `GITHUB_TOKEN` environment variable:
+
 ```
+➜  hello-c50 git:(main) env | grep -i github_to
+GITHUB_TOKEN=ghp_your-github-token-goes-here
 ➜  c50 gh teacher whoami
 crguezl
 ```

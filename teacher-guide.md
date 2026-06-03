@@ -157,3 +157,71 @@ ULL-ESIT-PL-2627/classroom50: added classroom ull-esit-pl-2627 (4 files)
 View at https://github.com/ULL-ESIT-PL-2627/classroom50/tree/main/ull-esit-pl-2627
 Next: gh teacher roster add ULL-ESIT-PL-2627 ull-esit-pl-2627 <username>
 ```
+
+## 5. Invite students to the org
+
+The fastest way to add students is `gh teacher roster add` (next step) — it registers them in the classroom roster *and* sends an org invite in one shot. Use the bare `gh teacher invite` only for ad-hoc cases (e.g., inviting a TA who shouldn't be in the student roster, or bringing in someone before the roster is set up):
+
+```sh
+gh teacher invite <org> <username>
+```
+
+![Demo: gh teacher invite](https://github.com/foundation50/classroom50/wiki/images/gh_teacher_invite.gif)
+
+The student gets an email invitation. They can accept it by visiting `https://github.com/<org>`, or skip ahead and let `gh student accept` auto-accept the pending invite when they accept their first assignment.
+
+Common API failures (missing scope, not an admin, org not found, already a member, pending invite) surface as actionable messages instead of raw HTTP errors.
+
+To invite a teaching assistant as an org admin instead:
+
+```sh
+gh teacher invite --admin <org> <username>
+```
+
+To invite someone to a single repo rather than the whole org (e.g. a TA on a specific assignment):
+
+```sh
+gh teacher invite <org>/<repo> <username>                 # default: push
+gh teacher invite -p maintain <org>/<repo> <username>     # other permissions
+```
+
+Permission options for `-p`: `pull`, `triage`, `push`, `maintain`, `admin`. Re-running with a different `-p` updates the existing collaborator's permission in place.
+
+### Example
+
+```
+  hello-c50 git:(main) ✗ gh teacher invite ULL-ESIT-PL-2627 casiano-rodriguez
+ULL-ESIT-PL-2627: invited casiano-rodriguez as direct_member
+Advise casiano-rodriguez to sign in to https://github.com as casiano-rodriguez, then visit https://github.com/ULL-ESIT-PL-2627 to accept the invitation at the top of the page.
+```
+
+### gh roster import help
+
+```
+➜  hello-c50 git:(main) ✗ gh teacher roster import --help
+Read <path-to-csv> and upsert every row into
+<org>/classroom50/<classroom>/students.csv. The local CSV
+header must be `username,first_name,last_name,email,section`
+(the canonical 5 columns). A trailing `github_id` column
+is accepted but its value is ignored — the CLI re-resolves
+github_id from `GET /users/{username}` at import time so
+the on-disk roster always carries the GitHub-authoritative
+ID. The `email` column may have empty values per row.
+
+The whole file is written in one Tree commit, not one PUT
+per row, so partial-import states can't appear on the repo.
+After the commit lands, any student who isn't already in
+the org (and doesn't have a pending invite) is invited.
+
+Usage:
+  gh-teacher roster import <org> <classroom> <path-to-csv> [flags]
+
+Examples:
+  gh teacher roster import cs50-fall-2026 cs-principles ./section-1.csv
+
+Flags:
+  -h, --help   help for import
+
+Global Flags:
+  -v, --verbose   Show operational details (per-step API/git output)
+```

@@ -70,7 +70,12 @@ gh teacher rotate-collect-token <org>
 
 See [organization-token.md](organization-token.md) for details on generating a fine-grained PAT for an organization.
 
-**What `init` sets up:** org-level member defaults (`default_repository_permission: none` so new members don't get implicit cross-repo access, and `members_can_create_public_repositories: false` so members can't accidentally publish student work — both via a single `PATCH /orgs/{org}`; warns and continues if an enterprise policy locks the fields), private `classroom50` repo with `auto_init`, embedded workflows (`publish-pages.yaml`, `collect-scores.yaml`, reusable `autograde-runner.yaml`), GitHub Pages (workflow build, visibility set to **public** so students can fetch published `assignments.json` unauthenticated; non-default `--autograder` YAML shims, when registered, are also fetched from Pages), branch protection on the default branch, workflow `GITHUB_TOKEN` permissions (409 tolerated when the org enforces a stricter policy — skeleton workflows declare their own workflow-level `permissions:` blocks), reusable-workflow access for other repos in the org (so student shims can `uses:` the runner), and the repo-level `CLASSROOM50_COLLECT_TOKEN` Actions secret.
+**What `init` sets up:** 
+- org-level member defaults (`default_repository_permission: none` so new members don't get implicit cross-repo access, and `members_can_create_public_repositories: false` so members can't accidentally publish student work — both via a single `PATCH /orgs/{org}`; 
+- warns and continues if an enterprise policy locks the fields), private `classroom50` repo with `auto_init`, embedded workflows (`publish-pages.yaml`, `collect-scores.yaml`, reusable `autograde-runner.yaml`), 
+- GitHub Pages (workflow build, visibility set to **public** so students can fetch published `assignments.json` unauthenticated; 
+- non-default `--autograder` YAML shims, when registered, are also fetched from Pages), branch protection on the default branch, workflow `GITHUB_TOKEN` permissions (409 tolerated when the org enforces a stricter policy — skeleton workflows declare their own workflow-level `permissions:` blocks), 
+- reusable-workflow access for other repos in the org (so student shims can `uses:` the runner), and the repo-level `CLASSROOM50_COLLECT_TOKEN` Actions secret.
 
 **Plan check.** `init` warns when the org is not on Team or Enterprise Cloud (required for Pages from a private repo). The warning is advisory; you can still proceed.
 
@@ -81,17 +86,73 @@ After `init` completes, the CLI prints the future Pages URL (`https://<org>.gith
 
 ```
 ➜  ull-esit-pl-2627 gh teacher init ULL-ESIT-PL-2627
-Warning: ULL-ESIT-PL-2627: couldn't tighten org member defaults (HTTP 422 (https://api.github.com/orgs/ULL-ESIT-PL-2627)); set them manually at https://github.com/organizations/ULL-ESIT-PL-2627/settings/member_privileges — Base permissions: No permission AND Repository creation: uncheck Public.
+Warning: ULL-ESIT-PL-2627: 
+  couldn't tighten org member defaults (HTTP 422 (https://api.github.com/orgs/ULL-ESIT-PL-2627)); set them manually at https://github.com/organizations/ULL-ESIT-PL-2627/settings/member_privileges 
+  — Base permissions: No permission AND Repository creation: uncheck Public.
 ULL-ESIT-PL-2627/classroom50: already exists, continuing setup
 ULL-ESIT-PL-2627/classroom50: skeleton already present, skipping commit
 ULL-ESIT-PL-2627/classroom50: Pages already enabled
-Warning: ULL-ESIT-PL-2627/classroom50: couldn't set Pages visibility to public (HTTP 400: Private pages is not enabled for this repository. All Pages will be public. (https://api.github.com/repos/ULL-ESIT-PL-2627/classroom50/pages)); toggle it manually at https://github.com/ULL-ESIT-PL-2627/classroom50/settings/pages → Visibility if students see 404s on the Pages URL
+Warning: 
+  ULL-ESIT-PL-2627/classroom50: couldn't set Pages visibility to public 
+  (HTTP 400: Private pages is not enabled for this repository. 
+  All Pages will be public. (https://api.github.com/repos/ULL-ESIT-PL-2627/classroom50/pages)); 
+  toggle it manually at https://github.com/ULL-ESIT-PL-2627/classroom50/settings/pages 
+  → Visibility if students see 404s on the Pages URL
 ULL-ESIT-PL-2627/classroom50: branch protection applied to main (no force-push, no delete)
-ULL-ESIT-PL-2627/classroom50: org default workflow permissions are "read"; skeleton workflows grant workflow-level write where needed. To raise the org default: gh api -X PUT /orgs/ULL-ESIT-PL-2627/actions/permissions/workflow -F default_workflow_permissions=write
+ULL-ESIT-PL-2627/classroom50: org default workflow permissions are "read"; skeleton workflows grant workflow-level write where needed. 
+To raise the org default: 
+    gh api -X PUT /orgs/ULL-ESIT-PL-2627/actions/permissions/workflow -F default_workflow_permissions=write
 ULL-ESIT-PL-2627/classroom50: reusable-workflow access enabled (organization)
-Note: the collect token should belong to an org-owned service account, not a personal teacher account. Pass --service-account-confirm to silence this notice.
+
+Note: the collect token should belong to an org-owned service account, not a personal teacher account. 
+Pass --service-account-confirm to silence this notice.
+
 CLASSROOM50_COLLECT_TOKEN (input hidden, ends with Enter): 
 ULL-ESIT-PL-2627/classroom50: stored CLASSROOM50_COLLECT_TOKEN
 Pages will serve at https://ULL-ESIT-PL-2627.github.io/classroom50/ once publish-pages completes its first run.
 Next: gh teacher classroom add ULL-ESIT-PL-2627 <short-name>
+```
+
+## 4. Add a classroom
+
+Each classroom is a directory at the root of `<org>/classroom50` holding four files:
+
+- `classroom.json` — public name / term / org metadata.
+- `assignments.json` — assignment manifest (published via Pages, fetched by `gh student accept` and by the autograde-runner workflow on every submission).
+- `students.csv` — private roster.
+- `scores.json` — private collected scores.
+
+Plus, optionally:
+
+- `autograder.py` at the classroom root — the **classroom default autograder**, used by every assignment that doesn't have its own override. Drop it via `gh teacher autograder set-default` (no scaffold by default — classrooms work without one, the runner just publishes a vacuous-pass result).
+- `autograders/<slug>/` subdirectories — **per-assignment overrides**. One folder per assignment slug containing `autograder.py` (the entrypoint) and any sibling fixtures or helpers.
+
+Foundation50-managed pieces (the runner-side bootstrap `.github/scripts/runner.py`, the runner workflow, the publish-pages allow-list) live at the org level, not per-classroom; the autograder shim that lands in each student repo is embedded in `gh-student` and never has to be edited by a teacher.
+
+Scaffold one with:
+
+```sh
+gh teacher classroom add <org> <short-name> --name "<full name>" --term <term>
+```
+
+For example:
+
+```sh
+gh teacher classroom add cs50-fall-2026 cs-principles --name "CS Principles" --term Spring-2026
+```
+
+The `<short-name>` must match `^[a-z0-9][a-z0-9-]{1,38}$` (2-39 chars, lowercase letters/digits/hyphens, starting with a letter or digit) because it flows into student repo names like `<short-name>-<assignment>-<username>`. `--name` and `--term` are optional but recommended — they're written into `classroom.json` and surface in the published Pages site (forthcoming) and in `gh teacher download` summaries.
+
+The command commits all four paths in a single Tree commit on the default branch. If `<org>/classroom50` doesn't exist yet, it prints `run gh teacher init <org> first` and exits non-zero. If the `<short-name>` directory already exists, it refuses to overwrite rather than clobbering an in-progress classroom — modify it via `gh teacher roster add` (step 6) and `gh teacher assignment add` (step 7) instead.
+
+Run this command once per classroom you teach in the org. You can have several classrooms side by side in the same `classroom50` repo.
+
+###  Example
+
+```
+  ull-esit-pl-2627 gh teacher classroom add ULL-ESIT-PL-2627 ull-esit-pl-2627 --name 'Procesadores de Lenguajes 26/27' --te
+rm 'segundo-cuatrimestre-26-27'
+ULL-ESIT-PL-2627/classroom50: added classroom ull-esit-pl-2627 (4 files)
+View at https://github.com/ULL-ESIT-PL-2627/classroom50/tree/main/ull-esit-pl-2627
+Next: gh teacher roster add ULL-ESIT-PL-2627 ull-esit-pl-2627 <username>
 ```

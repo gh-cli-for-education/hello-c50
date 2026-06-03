@@ -57,11 +57,18 @@ gh teacher init <org>
 
 `init` is idempotent: re-running picks up where a prior run left off (it does not overwrite teacher edits to the skeleton).
 
-**Collect token.** Supply a fine-grained PAT with **Contents: read** on org repos whose names match `<classroom>-*`. Store it only via the `CLASSROOM50_COLLECT_TOKEN` environment variable or a hidden stdin prompt — there is no `--collect-token` flag (command-line PATs leak via shell history and process listings). Use an org-owned service account, not a personal teacher account; pass `--service-account-confirm` to silence the reminder. Rotate before expiry (fine-grained PATs support up to 1 year; 90 days is a common rotation interval) with:
+**Collect token.** 
+
+- Supply a fine-grained PAT with **Contents: read** on org repos whose names match `<classroom>-*`. 
+- Store it only via the `CLASSROOM50_COLLECT_TOKEN` environment variable or a hidden stdin prompt
+— there is no `--collect-token` flag (command-line PATs leak via shell history and process listings). 
+- Use an org-owned service account, not a personal teacher account; pass `--service-account-confirm` to silence the reminder. Rotate before expiry (fine-grained PATs support up to 1 year; 90 days is a common rotation interval) with:
 
 ```sh
 gh teacher rotate-collect-token <org>
 ```
+
+See [organization-token.md](organization-token.md) for details on generating a fine-grained PAT for an organization.
 
 **What `init` sets up:** org-level member defaults (`default_repository_permission: none` so new members don't get implicit cross-repo access, and `members_can_create_public_repositories: false` so members can't accidentally publish student work — both via a single `PATCH /orgs/{org}`; warns and continues if an enterprise policy locks the fields), private `classroom50` repo with `auto_init`, embedded workflows (`publish-pages.yaml`, `collect-scores.yaml`, reusable `autograde-runner.yaml`), GitHub Pages (workflow build, visibility set to **public** so students can fetch published `assignments.json` unauthenticated; non-default `--autograder` YAML shims, when registered, are also fetched from Pages), branch protection on the default branch, workflow `GITHUB_TOKEN` permissions (409 tolerated when the org enforces a stricter policy — skeleton workflows declare their own workflow-level `permissions:` blocks), reusable-workflow access for other repos in the org (so student shims can `uses:` the runner), and the repo-level `CLASSROOM50_COLLECT_TOKEN` Actions secret.
 

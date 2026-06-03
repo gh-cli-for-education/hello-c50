@@ -23,11 +23,19 @@ Org invitations require the `admin:org` OAuth scope, which `gh auth login` doesn
 gh teacher login
 ```
 
-![Demo: gh teacher login](images/gh_teacher_auth.gif)
+![Demo: gh teacher login](https://github.com/foundation50/classroom50/wiki/images/gh_teacher_auth.gif)
 
 This shells out to `gh auth login -s admin:org` and opens a browser to authorize. If you haven't logged in to `gh` before, it performs the initial login and grants `admin:org` in one shot; if you have, it re-authenticates with the new scope appended.
 
 If you skip this step and have no token at all, the CLI detects the missing token and runs `gh teacher login` automatically. If a token exists but lacks `admin:org`, commands like `gh teacher invite` will fail with an error instructing you to run `gh teacher login` to grant the scope.
+
+### Login
+
+```
+➜  c50 gh teacher whoami
+crguezl
+```
+
 
 ## 3. Bootstrap the classroom50 config repo
 
@@ -59,11 +67,6 @@ After `init` completes, the CLI prints the future Pages URL (`https://<org>.gith
 
 
 ### gh teacher init ULL-ESIT-PL-2627
-
-```
-➜  c50 gh teacher whoami
-crguezl
-```
 
 ```
 ➜  ull-esit-pl-2627 gh teacher init ULL-ESIT-PL-2627

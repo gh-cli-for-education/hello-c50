@@ -5,6 +5,7 @@
 
 ## Proctoring at ULL
 
+- [Safe Exam Browser](https://safeexambrowser.org/) This is a web browser environment to carry out online exams safely. It controls access to resources, applications and prevents data exchange. Use it for Moodle quizzes. Available at ULL. 
 - [VSCodium](https://github.com/VSCodium/vscodium) This is not a fork of VSCode (but it lookos like!). 
   
   This is a repository of scripts to automatically build Microsoft's vscode repository into freely-licensed binaries with a community-driven default configuration.

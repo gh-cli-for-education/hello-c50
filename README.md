@@ -10,3 +10,4 @@
   
   This is a repository of scripts to automatically build Microsoft's vscode repository into freely-licensed binaries with a community-driven default configuration. Previous to the exam, the teachers decide what package extensions to install and the administrators at Centro de Calculo configure A version of VSCodium for the exam. It is installed in the "Cuentas de examen" of the Centro de Cálculo.
 - El Centro de Cálculo cuenta con "Cuentas de examen", en las que se corta internet y  el alumnado solo tiene acceso al campus virtual. No solo no pueden conectarse a internet, ni siquiera hacer ssh a una máquina local
+- [Coderunner](https://docs.moodle.org/all/es/Tipo_de_pregunta_CodeRunner). https://moodle.org/plugins/qtype_coderunner

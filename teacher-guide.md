@@ -5,7 +5,7 @@ The CLI doesn't create the org for you. Do these once via the GitHub web UI:
 1. **Create the organization** at <https://github.com/account/organizations/new>.
 2. **Create a template assignment repo.** 
 
-Any repo flagged as a template (Settings → "Template repository") works. 
+Any repo flagged as a template (`Settings → "Template repository"`) works. 
 **The template must be public** so students can read it: 
 the "No permission" baseline that `gh teacher init` applies in step 3 blocks org members from reading private repos they aren't explicit collaborators on, and a private template would 404 on `gh student accept`. 
 
@@ -113,6 +113,8 @@ ULL-ESIT-PL-2627/classroom50: stored CLASSROOM50_COLLECT_TOKEN
 Pages will serve at https://ULL-ESIT-PL-2627.github.io/classroom50/ once publish-pages completes its first run.
 Next: gh teacher classroom add ULL-ESIT-PL-2627 <short-name>
 ```
+
+See the resulting repo at [ULL-ESIT-PL-2627/classroom50](https://github.com/ULL-ESIT-PL-2627/classroom50/tree/main)
 
 ## 4. Add a classroom
 
